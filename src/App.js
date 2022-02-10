@@ -5,8 +5,10 @@ import ViewItem from "./pages/ViewItem";
 import { useCallback, useState } from "react";
 import Cart from "./pages/Cart";
 import Navbar from "./components/Navbar";
+import { useLocalStorage } from "react-use";
+import AddItem from "./pages/AddItem";
 
-const shopItems = [
+const shopItemsSeed = [
   {
     id: 1,
     name: "Pear",
@@ -27,7 +29,8 @@ const shopItems = [
 
 function App() {
 
-  const [cartItems, setCartItems] = useState([]);
+  const [shopItems, setShopItems] = useState(shopItemsSeed)
+  const [cartItems, setCartItems] = useLocalStorage("cart",[]);
 
   const removeFromCart = useCallback(
     (id) => {
@@ -111,6 +114,16 @@ function App() {
     [cartItems]
   );
 
+  const getNextShopItemID =useCallback(()=>{
+    return Math.max(...shopItems.map((item)=>{
+      return item.id
+    })) +1
+  },[shopItems])
+
+  const addToShop = useCallback((newItem) => {
+    setShopItems([...shopItems, {newItem, id: getNextShopItemID()}])
+  },[]) 
+
   return (
     <BrowserRouter>
       <div className="App">
@@ -119,6 +132,7 @@ function App() {
           <Route exact path="/" element={<Home shopItems={shopItems} onAdd={addToCart} onRemove={removeFromCart}/>}/>
           <Route path="/viewitem/:id" element={<ViewItem shopItems={shopItems} onAdd={addToCart} onRemove={removeFromCart} />}/>
           <Route path="/cart" element={<Cart shopItems={shopItems} cartItems={cartItems} onAdd={addToCart} onRemove={removeFromCart}/>}/>
+          <Route path="/additem" element={<AddItem />}/>
         </Routes>
       </div>
     </BrowserRouter>
